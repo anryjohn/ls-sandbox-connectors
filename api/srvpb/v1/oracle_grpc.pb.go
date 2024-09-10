@@ -28,6 +28,7 @@ const (
 	SandboxService_GetHealthCheck_FullMethodName = "/srvpb.v1.SandboxService/GetHealthCheck"
 	SandboxService_CreateClaim_FullMethodName    = "/srvpb.v1.SandboxService/CreateClaim"
 	SandboxService_GetClaim_FullMethodName       = "/srvpb.v1.SandboxService/GetClaim"
+	SandboxService_TestTrigger_FullMethodName    = "/srvpb.v1.SandboxService/TestTrigger"
 )
 
 // SandboxServiceClient is the client API for SandboxService service.
@@ -42,6 +43,7 @@ type SandboxServiceClient interface {
 	CreateClaim(ctx context.Context, in *v11.CreateClaimRequest, opts ...grpc.CallOption) (*v11.CreateClaimResponse, error)
 	// Retrieve claim details.
 	GetClaim(ctx context.Context, in *v11.GetClaimRequest, opts ...grpc.CallOption) (*v11.GetClaimResponse, error)
+	TestTrigger(ctx context.Context, in *v11.TestTriggerRequest, opts ...grpc.CallOption) (*v11.TestTriggerResponse, error)
 }
 
 type sandboxServiceClient struct {
@@ -82,6 +84,16 @@ func (c *sandboxServiceClient) GetClaim(ctx context.Context, in *v11.GetClaimReq
 	return out, nil
 }
 
+func (c *sandboxServiceClient) TestTrigger(ctx context.Context, in *v11.TestTriggerRequest, opts ...grpc.CallOption) (*v11.TestTriggerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.TestTriggerResponse)
+	err := c.cc.Invoke(ctx, SandboxService_TestTrigger_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SandboxServiceServer is the server API for SandboxService service.
 // All implementations must embed UnimplementedSandboxServiceServer
 // for forward compatibility.
@@ -94,6 +106,7 @@ type SandboxServiceServer interface {
 	CreateClaim(context.Context, *v11.CreateClaimRequest) (*v11.CreateClaimResponse, error)
 	// Retrieve claim details.
 	GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error)
+	TestTrigger(context.Context, *v11.TestTriggerRequest) (*v11.TestTriggerResponse, error)
 	mustEmbedUnimplementedSandboxServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedSandboxServiceServer) CreateClaim(context.Context, *v11.Creat
 }
 func (UnimplementedSandboxServiceServer) GetClaim(context.Context, *v11.GetClaimRequest) (*v11.GetClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetClaim not implemented")
+}
+func (UnimplementedSandboxServiceServer) TestTrigger(context.Context, *v11.TestTriggerRequest) (*v11.TestTriggerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TestTrigger not implemented")
 }
 func (UnimplementedSandboxServiceServer) mustEmbedUnimplementedSandboxServiceServer() {}
 func (UnimplementedSandboxServiceServer) testEmbeddedByValue()                        {}
@@ -188,6 +204,24 @@ func _SandboxService_GetClaim_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SandboxService_TestTrigger_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.TestTriggerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).TestTrigger(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_TestTrigger_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).TestTrigger(ctx, req.(*v11.TestTriggerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SandboxService_ServiceDesc is the grpc.ServiceDesc for SandboxService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +240,10 @@ var SandboxService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetClaim",
 			Handler:    _SandboxService_GetClaim_Handler,
+		},
+		{
+			MethodName: "TestTrigger",
+			Handler:    _SandboxService_TestTrigger_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

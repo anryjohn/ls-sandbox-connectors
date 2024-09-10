@@ -1,0 +1,12 @@
+diff -urN orig/operate/webapp/src/main/java/io/camunda/operate/webapp/security/BaseWebConfigurer.java mine/operate/webapp/src/main/java/io/camunda/operate/webapp/security/BaseWebConfigurer.java
+--- orig/operate/webapp/src/main/java/io/camunda/operate/webapp/security/BaseWebConfigurer.java	2024-08-16 17:31:30.000000000 +0000
++++ mine/operate/webapp/src/main/java/io/camunda/operate/webapp/security/BaseWebConfigurer.java	2024-08-16 18:46:47.517357826 +0000
+@@ -158,7 +158,7 @@
+             (login) -> {
+               login
+                   .loginProcessingUrl(LOGIN_RESOURCE)
+-                  .successHandler(this::successHandler)
++                  //.successHandler(this::successHandler)
+                   .failureHandler(this::failureHandler)
+                   .permitAll();
+             })

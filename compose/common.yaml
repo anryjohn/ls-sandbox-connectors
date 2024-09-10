@@ -22,3 +22,16 @@ services:
     volumes:
       - ${PROJECT_DIR:-..}/phylum:/opt/phylum:ro
     restart: always
+  sandbox_postgres:
+    # command to build the below image:
+    # docker build -t sameersbn/postgresql github.com/sameersbn/docker-postgresql
+    image: sameersbn/postgresql
+    container_name: sandbox_postgres
+    ports:
+    - 5432:5432
+    environment:
+    - DEBUG=false
+    - DB_USER=lutheran
+    - DB_PASS=supersecret
+    - DB_NAME=lutherize
+    restart: always

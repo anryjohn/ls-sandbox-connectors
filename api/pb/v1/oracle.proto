@@ -48,3 +48,11 @@ message Claim {
   // State of the claim.
   ClaimState state = 2;
 }
+
+message TestTriggerRequest {
+  string kind = 1;
+}
+
+message TestTriggerResponse {
+  common.v1.Exception exception = 1;
+}

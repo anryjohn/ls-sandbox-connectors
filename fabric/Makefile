@@ -10,6 +10,7 @@ DOCKER_CHOWN_USER=65534:65534
 
 include ${PROJECT_REL_DIR}/common.fabric.mk
 
-${PHYLUM_PATH}: make-C/../phylum
+${PHYLUM_PATH}:
+	make -C ./../phylum
 
 fnb-up: channel-artifacts/genesis.block

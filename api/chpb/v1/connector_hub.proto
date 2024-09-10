@@ -1,0 +1,95 @@
+// API Models and Documentation.
+
+syntax = "proto3";
+
+package chpb.v1;
+
+option go_package = "github.com/luthersystems/sandbox/api/chpb/v1";
+
+// PostgresClazz represents a possible type of value that can be represented by a string.
+enum PostgresClazz {
+  POSTGRES_CLAZZ_UNSPECIFIED = 0;
+  // A null value is represented by the empty string
+  POSTGRES_CLAZZ_NULL = 1;
+  // A boolean value is represented by either "true" or "false", with case sensitivity
+  POSTGRES_CLAZZ_BOOLEAN = 2;
+  // An integral value is represented by whatever strconv.FormatInt(v, 64) outputs or strconv.ParseInt(s, 64) inputs
+  POSTGRES_CLAZZ_INTEGRAL = 3;
+  // A floating-point value is represented by whatever strconv.FormatFloat(v, 'g', -1, 64) outputs or strconv.ParseFloat(s, 64) inputs
+  POSTGRES_CLAZZ_FLOATING_POINT = 4;
+  // A text value is represented by its 1:1 string.
+  POSTGRES_CLAZZ_TEXT = 5;
+  // A blob value is represented by its hexadecimal encoding; i.e., whatever hex.EncodeToString(v) outputs or hex.DecodeString(s) inputs
+  POSTGRES_CLAZZ_BLOB = 6;
+}
+
+// PostgresValue represents a single value obtained from or destined to a table in a database managed by PostgreSQL.
+message PostgresValue {
+  PostgresClazz clazz = 1; // Clazz of the value that indicates how to interpret the representation
+  string representation = 2; // String representation of the value
+}
+
+// PostgresRow represents a single row obtained from a table in a database managed by PostgreSQL.
+message PostgresRow {
+  repeated PostgresValue values = 1; // Values of the row.
+}
+
+// PostgresError represents an error that may have originated in PostgreSQL, in the lib/pq driver, or in the connector.
+// If the error was not a PostgreSQL originated error, error_code will be "CONNR".
+message PostgresError {
+  string error_code = 1; // PostgreSQL specific error code
+  string error_message = 2; // Detailed error message
+}
+
+// PostgresRequest represents a request to make a PostgreSQL query.
+message PostgresRequest {
+  string query = 1; // The SQL query to be executed
+  repeated PostgresValue arguments = 2; // Arguments for parameterized queries
+  map<string, string> metadata = 3; // Additional metadata
+}
+
+// PostgresResponse represents a response to a PostgreSQL query.
+message PostgresResponse {
+  repeated string column_names = 1; // Column names
+  repeated PostgresRow rows = 2; // The rows returned by the query
+  PostgresError error = 3; // Postgres specific error message
+  map<string, string> metadata = 4; // Additional metadata
+}
+
+message EmailRequest {
+  string recipient = 1;
+  string title = 2;
+  string body = 3;
+}
+
+message EmailResponse {}
+
+message CamundaStartRequest {
+  string process_id = 1;
+  string variables = 2; // hex-encoded JSON
+}
+
+message CamundaStartResponse {
+  bool success = 1;
+  string diagnostic = 2;
+  int64 process_instance_key = 3;
+}
+
+message CamundaInspectRequest {
+  int64 process_instance_key = 1;
+  string wait_for_state = 2;
+}
+
+message CamundaInspectResponse {
+  bool success = 1;
+  string diagnostic = 2;
+  string content = 3; // hex-encoded JSON, or "" if not found
+}
+
+message Event {
+  string request_id = 1;
+  PostgresRequest connector_postgres = 2;
+  EmailRequest connector_email = 3;
+  CamundaStartRequest connector_camunda_start = 4;
+  CamundaInspectRequest connector_camunda_inspect = 5;
+}

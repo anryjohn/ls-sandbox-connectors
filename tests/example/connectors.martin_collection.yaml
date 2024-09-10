@@ -1,0 +1,61 @@
+name: "Sandbox Example: Connectors"
+headers:
+    - key: Content-Type
+      value: application/json
+tests:
+    - name: "trigger postgres1"
+      method: POST
+      path: "v1/test-trigger"
+      body: |
+          {
+            "kind": "postgres1"
+          }
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("error");
+          });
+    - name: "trigger email1"
+      method: POST
+      path: "v1/test-trigger"
+      body: |
+          {
+            "kind": "email1"
+          }
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("error");
+          });
+    - name: "trigger email2"
+      method: POST
+      path: "v1/test-trigger"
+      body: |
+          {
+            "kind": "email2"
+          }
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("error");
+          });
+    - name: "trigger camunda1"
+      method: POST
+      path: "v1/test-trigger"
+      body: |
+          {
+            "kind": "camunda1"
+          }
+      test_script: |
+          pm.test("ok", () => {
+              let data = pm.response.json();
+              console.log(data);
+              pm.response.to.have.status(200);
+              pm.expect(data).to.not.have.property("error");
+          });

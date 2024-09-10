@@ -116,4 +116,10 @@ service SandboxService {
     option (google.api.http) = {get: "/v1/claim/{claim_id}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {tags: "Service"};
   }
+  rpc TestTrigger(pb.v1.TestTriggerRequest) returns (pb.v1.TestTriggerResponse) {
+    option (google.api.http) = {
+      post: "/v1/test-trigger"
+      body: "*"
+    };
+  }
 }

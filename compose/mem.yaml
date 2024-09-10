@@ -11,9 +11,15 @@ services:
     environment:
     - SANDBOX_ORACLE_EMULATE_CC=true
     - TMPDIR=/tmp
-    - SUBSTRATEHCP_FILE=/tmp/plugin
+    - SUBSTRATEHCP_FILE=/tmp/plugin/${SUBSTRATE_PLUGIN_LINUX}
     volumes:
-    - ../${SUBSTRATE_PLUGIN_LINUX}:/tmp/plugin
+    - ./../build:/tmp/plugin/build:ro
+    networks:
+    - byfn
+  sandbox_postgres:
+    extends:
+      file: common.yaml
+      service: sandbox_postgres
     networks:
     - byfn
 networks:

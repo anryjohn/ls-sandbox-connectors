@@ -1,0 +1,75 @@
+diff --git a/demo/docker-compose.yml b/demo/docker-compose.yml
+index 9027847..29bee56 100644
+--- a/demo/docker-compose.yml
++++ b/demo/docker-compose.yml
+@@ -4,12 +4,12 @@ services:
+   app:
+     image: mlan/kopano
+     networks:
+-      - backend
++      - byfn
+     ports:
+       - "127.0.0.1:8008:80"    # WebApp & EAS (alt. HTTP)
+       - "127.0.0.1:143:143"    # IMAP (not needed if all devices can use EAS)
+       - "127.0.0.1:110:110"    # POP3 (not needed if all devices can use EAS)
+-      - "127.0.0.1:8080:8080"  # ICAL (not needed if all devices can use EAS)
++      - "127.0.0.1:8089:8080"  # ICAL (not needed if all devices can use EAS)
+       - "127.0.0.1:993:993"    # IMAPS (not needed if all devices can use EAS)
+       - "127.0.0.1:995:995"    # POP3S (not needed if all devices can use EAS)
+       - "127.0.0.1:8443:8443"  # ICALS (not needed if all devices can use EAS)
+@@ -53,7 +53,7 @@ services:
+     image: mlan/postfix
+     hostname: ${MAIL_SRV-mx}.${MAIL_DOMAIN-example.com}
+     networks:
+-      - backend
++      - byfn
+     ports:
+       - "127.0.0.1:25:25"      # SMTP
+       - "127.0.0.1:465:465"    # SMTPS authentication required
+@@ -68,7 +68,7 @@ services:
+       - SMTP_RELAY_HOSTAUTH=${SMTP_RELAY_HOSTAUTH-}
+       - SMTP_TLS_SECURITY_LEVEL=${SMTP_TLS_SECURITY_LEVEL-}
+       - SMTP_TLS_WRAPPERMODE=${SMTP_TLS_WRAPPERMODE-no}
+-      - SMTPD_USE_TLS=yes
++      - SMTPD_USE_TLS=no
+       - LDAP_USER_BASE=ou=${AD_USR_OU-users},${AD_BASE-dc=example,dc=com}
+       - LDAP_QUERY_FILTER_USER=(&(objectclass=${AD_USR_OB-kopano-user})(mail=%s))
+       - LDAP_QUERY_FILTER_ALIAS=(&(objectclass=${AD_USR_OB-kopano-user})(kopanoAliases=%s))
+@@ -84,7 +84,7 @@ services:
+   flt:
+     image: mlan/rspamd
+     networks:
+-      - backend
++      - byfn
+     ports:
+       - "127.0.0.1:11334:11334" # HTML rspamd WebGui
+     depends_on:
+@@ -109,7 +109,7 @@ services:
+     image: mariadb
+     command: ['--log_warnings=1']
+     networks:
+-      - backend
++      - byfn
+     environment:
+       - LANG=C.UTF-8
+       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD-secret}
+@@ -123,7 +123,7 @@ services:
+   auth:
+     image: mlan/openldap
+     networks:
+-      - backend
++      - byfn
+     command: --root-cn ${AD_ROOT_CN-admin} --root-pw ${AD_ROOT_PW-secret}
+     environment:
+       - LDAPBASE=${AD_BASE-dc=example,dc=com}
+@@ -133,7 +133,9 @@ services:
+       - /etc/localtime:/etc/localtime:ro        # Use host timezone
+ 
+ networks:
+-  backend:
++  byfn:
++    name: byfn
++    external: true
+ 
+ volumes:
+   app-atch:

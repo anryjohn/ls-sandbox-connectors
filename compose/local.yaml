@@ -11,6 +11,12 @@ services:
     - SANDBOX_ORACLE_EMULATE_CC=false
     networks:
     - byfn
+  sandbox_postgres:
+    extends:
+      file: common.yaml
+      service: sandbox_postgres
+    networks:
+    - byfn
 networks:
   byfn:
     name: byfn

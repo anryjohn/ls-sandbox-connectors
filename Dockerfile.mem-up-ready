@@ -1,0 +1,6 @@
+FROM debian:sid
+
+RUN apt-get update && echo luthersystems/mem-up-ready.001
+RUN apt-get -y install docker.io
+
+COPY ./scripts/wait-healthy.sh /opt

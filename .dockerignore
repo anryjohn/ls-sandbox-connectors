@@ -3,6 +3,7 @@
 # ignore most of /build
 /build/*
 !/build/substratehcp-linux*
+!/build/gomodcache.tar
 
 **/*.lisp
 **/*.md

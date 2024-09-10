@@ -238,7 +238,7 @@ notify-gw-%: ${SHIROCLIENT_TARGET} compile-phylum-$$(ccname) build/volume/msp bu
 		-e DOMAIN_NAME="${FABRIC_DOMAIN}" \
 		--network ${FABRIC_DOCKER_NETWORK} \
 		${SHIROCLIENT_IMAGE}:${SHIROCLIENT_VERSION} -v \
-			--config ${SHIROCLIENT_FABRIC_CONFIG_FAST_BASENAME}_${ccname}.yaml \
+			--config ${SHIROCLIENT_FABRIC_CONFIG_BASENAME}_${ccname}.yaml \
 			--chaincode.version ${CC_VERSION}_${ccname} \
 			notify -g http://${name}:8082 "$(shell cat ${PHYLUM_VERSION_FILE})"
 

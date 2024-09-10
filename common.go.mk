@@ -43,10 +43,26 @@ clean:
 	# make sure it's really gone
 	sh -c '! ${DOCKER} volume inspect ${GO_PKG_VOLUME}'
 
-${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile
+.PHONY: cleangomodcache
+cleangomodcache:
+	rm -f ${PROJECT_REL_DIR}/build/gomodcache.tar
+
+${PROJECT_REL_DIR}/build/gomodcache.tar:
+	${MKDIR_P} $(dir $@)
+	@echo "Building cache for ${DOCKER_IMAGE}"
+	${TIME_P} ${DOCKER_RUN} \
+		-e "GONOSUMDB=${GONOSUMDB}" \
+		-e "GOPROXY=${GOPROXY}" \
+		-v ${DOCKER_PROJECT_DIR}:/mnt/project_rel_dir \
+		-w /mnt/project_rel_dir \
+		${BUILD_IMAGE} \
+		bash ./scripts/build_download.sh
+
+${DOCKER_IMAGE_DUMMY}: ${GO_SOURCE_FILES} Makefile ${PROJECT_REL_DIR}/common.mk ${PROJECT_REL_DIR}/go.mod ${PROJECT_REL_DIR}/common.go.mk ${PROJECT_REL_DIR}/Dockerfile ${PROJECT_REL_DIR}/build/gomodcache.tar
 	${MKDIR_P} $(dir $@)
 	@echo "Building image ${DOCKER_IMAGE}"
 	${TIME_P} ${DOCKER} build \
+		--network none \
 		--build-arg "BUILD_IMAGE=${BUILD_IMAGE}" \
 		--build-arg "SERVICE_BASE_IMAGE=${SERVICE_BASE_IMAGE}" \
 		--build-arg "GONOSUMDB=${GONOSUMDB}" \

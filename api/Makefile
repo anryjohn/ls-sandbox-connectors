@@ -5,7 +5,7 @@ include ${PROJECT_REL_DIR}common.mk
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 
 BUILD_IMAGE=${BUILD_IMAGE_API}:${BUILDENV_TAG}
-PROTO_SOURCE_FILES=$(wildcard pb/*/*.proto) $(wildcard srvpb/*/*.proto) $(wildcard common/*.proto)
+PROTO_SOURCE_FILES=$(wildcard pb/*/*.proto) $(wildcard srvpb/*/*.proto) $(wildcard common/*.proto) $(wildcard chpb/*/*.proto)
 
 BUILD_IMAGE_PROJECT_DIR=/go/src/${PROJECT_PATH}
 BUILD_WORKDIR=${BUILD_IMAGE_PROJECT_DIR}/api

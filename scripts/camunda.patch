@@ -1,0 +1,175 @@
+diff --git a/docker-compose-core.yaml b/docker-compose-core.yaml
+index c7e1f5b..488fe15 100644
+--- a/docker-compose-core.yaml
++++ b/docker-compose-core.yaml
+@@ -11,16 +11,38 @@
+ 
+ services:
+ 
++  camunda-platform-rest-api:
++    container_name: camunda-platform-rest-api
++    image: ghcr.io/korthout/camunda-platform-rest-api:${CAMUNDA_PLATFORM_REST_API_VERSION:-latest}
++    environment:
++      - ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS=zeebe.byfn:26500
++      - ZEEBE_CLIENT_SECURITY_PLAINTEXT=true
++      - CAMUNDA_OPERATE_CLIENT_URL=http://operate.byfn:8080
++      - CAMUNDA_OPERATE_CLIENT_USERNAME=demo
++      - CAMUNDA_OPERATE_CLIENT_PASSWORD=demo
++    restart: unless-stopped
++    healthcheck:
++      test: [ "CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1" ]
++      interval: 30s
++      timeout: 5s
++      retries: 5
++      start_period: 30s
++    networks:
++      - byfn
++    depends_on:
++      - zeebe
++      - operate
++
+   zeebe: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#zeebe
+     image: camunda/zeebe:${CAMUNDA_PLATFORM_VERSION}
+     container_name: zeebe
+     ports:
+       - "26500:26500"
+-      - "9600:9600"
++      #- "9600:9600"
+       - "8088:8080"
+     environment: # https://docs.camunda.io/docs/self-managed/zeebe-deployment/configuration/environment-variables/
+       - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
+-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
++      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch.byfn:9200
+       # default is 1000, see here: https://github.com/camunda/zeebe/blob/main/exporters/elasticsearch-exporter/src/main/java/io/camunda/zeebe/exporter/ElasticsearchExporterConfiguration.java#L259
+       - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE=1
+       # allow running with low disk space
+@@ -37,7 +59,7 @@ services:
+     volumes:
+       - zeebe:/usr/local/zeebe/data
+     networks:
+-      - camunda-platform
++      - byfn
+     depends_on:
+       - elasticsearch
+ 
+@@ -45,14 +67,19 @@ services:
+     image: camunda/operate:${CAMUNDA_PLATFORM_VERSION}
+     container_name: operate
+     ports:
+-      - "8081:8080"
++      - "8087:8080"
+     environment: # https://docs.camunda.io/docs/self-managed/operate-deployment/configuration/
+-      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe:26500
+-      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+-      - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
++      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe.byfn:26500
++      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch.byfn:9200
++      - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch.byfn:9200
+       - CAMUNDA_OPERATE_CSRFPREVENTIONENABLED=false
+       - management.endpoints.web.exposure.include=health
+       - management.endpoint.health.probes.enabled=true
++      - logging.level.org.springframework=DEBUG
++      - logging.level.io.camunda.operate.webapp.security=DEBUG
++      - logging.level.io.camunda.operate.webapp=DEBUG
++      - logging.level.io.camunda.operate=DEBUG
++      - logging.level.io.camunda=DEBUG
+     healthcheck:
+       test: [ "CMD-SHELL", "wget -O - -q 'http://localhost:8080/actuator/health/readiness'" ]
+       interval: 30s
+@@ -60,7 +87,7 @@ services:
+       retries: 5
+       start_period: 30s
+     networks:
+-      - camunda-platform
++      - byfn
+     depends_on:
+       - zeebe
+       - elasticsearch
+@@ -71,10 +98,10 @@ services:
+     ports:
+       - "8082:8080"
+     environment: # https://docs.camunda.io/docs/self-managed/tasklist-deployment/configuration/
+-      - CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS=zeebe:26500
+-      - CAMUNDA_TASKLIST_ZEEBE_RESTADDRESS=http://zeebe:8080
+-      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch:9200
+-      - CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
++      - CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS=zeebe.byfn:26500
++      - CAMUNDA_TASKLIST_ZEEBE_RESTADDRESS=http://zeebe.byfn:8080
++      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch.byfn:9200
++      - CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL=http://elasticsearch.byfn:9200
+       - CAMUNDA_TASKLIST_CSRFPREVENTIONENABLED=false
+       - management.endpoints.web.exposure.include=health
+       - management.endpoint.health.probes.enabled=true
+@@ -85,7 +112,7 @@ services:
+       retries: 5
+       start_period: 30s
+     networks:
+-      - camunda-platform
++      - byfn
+     depends_on:
+       - zeebe
+       - elasticsearch
+@@ -96,9 +123,9 @@ services:
+     ports:
+       - "8085:8080"
+     environment:
+-      - ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS=zeebe:26500
++      - ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS=zeebe.byfn:26500
+       - ZEEBE_CLIENT_SECURITY_PLAINTEXT=true
+-      - CAMUNDA_OPERATE_CLIENT_URL=http://operate:8080
++      - CAMUNDA_OPERATE_CLIENT_URL=http://operate.byfn:8080
+       - CAMUNDA_OPERATE_CLIENT_USERNAME=demo
+       - CAMUNDA_OPERATE_CLIENT_PASSWORD=demo
+       - management.endpoints.web.exposure.include=health
+@@ -111,7 +138,7 @@ services:
+       start_period: 30s
+     env_file: connector-secrets.txt
+     networks:
+-      - camunda-platform
++      - byfn
+     depends_on:
+       - zeebe
+       - operate
+@@ -142,26 +169,26 @@ services:
+     volumes:
+       - elastic:/usr/share/elasticsearch/data
+     networks:
+-      - camunda-platform
++      - byfn
+ 
+-  kibana:
+-    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+-    container_name: kibana
+-    ports:
+-      - 5601:5601
+-    volumes:
+-      - kibana:/usr/share/kibana/data
+-    networks:
+-      - camunda-platform
+-    depends_on:
+-      - elasticsearch
+-    profiles:
+-      - kibana
++#  kibana:
++#    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
++#    container_name: kibana
++#    ports:
++#      - 5601:5601
++#    volumes:
++#      - kibana:/usr/share/kibana/data
++#    networks:
++#      - byfn
++#    depends_on:
++#      - elasticsearch
+ 
+ volumes:
+   zeebe:
+   elastic:
+-  kibana:
++#  kibana:
+ 
+ networks:
+-  camunda-platform:
++  byfn:
++    name: byfn
++    external: true
